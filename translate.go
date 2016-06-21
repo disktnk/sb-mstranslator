@@ -14,7 +14,6 @@ import (
 )
 
 var (
-	primaryKeyPath          = data.MustCompilePath("primary_key")
 	clientIDPath            = data.MustCompilePath("client_id")
 	clientSecretPath        = data.MustCompilePath("client_secret")
 	scopePath               = data.MustCompilePath("scope")
@@ -184,7 +183,7 @@ func Translate(ctx *core.Context, tokenName, from, to, target string) (
 	if err := xml.Unmarshal([]byte(bodyStr), &ret); err != nil {
 		return "", err
 	}
-
+	// TODO: return error message from MS TRANSLATOR API
 	return ret.Result, nil
 }
 
