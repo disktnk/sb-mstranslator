@@ -75,6 +75,7 @@ func NewState(ctx *core.Context, params data.Map) (core.SharedState,
 		grantType:      grantType,
 		accessTokenURL: accessTokenURL,
 		translatorURL:  translatorURL,
+		updateTime:     time.Now(),
 	}, nil
 }
 
@@ -178,16 +179,13 @@ func Translate(ctx *core.Context, tokenName, from, to, target string) (
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
-	root := struct {
-		translated
-		XMLName struct{} `xml:"result"`
-	}{translated: translated{}}
-
-	if err := xml.Unmarshal(body, &root); err != nil {
-		return "", nil
+	bodyStr := "<result>" + string(body) + "</result>"
+	var ret translated
+	if err := xml.Unmarshal([]byte(bodyStr), &ret); err != nil {
+		return "", err
 	}
 
-	return root.Result, nil
+	return ret.Result, nil
 }
 
 type translated struct {
