@@ -29,6 +29,22 @@ const (
 	msTranslatorURL            = "http://api.microsofttranslator.com/V2/Http.svc/Translate"
 )
 
+// NewState returns a state managing access token of Microsoft Translation
+// API.
+//
+// "client_id": required value. Set client ID of MS developer account.
+//
+// "client_secret": required value. Set client secret of MS developer account.
+//
+// "scope": option value, default: "http://api.microsofttranslator.com"
+//
+// "access_token_url": option value,
+// default: "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13"
+//
+// "grant_type": option value, default: "client_credentials"
+//
+// "translator_url": option value,
+// default: "http://api.microsofttranslator.com/V2/Http.svc/Translate"
 func NewState(ctx *core.Context, params data.Map) (core.SharedState,
 	error) {
 	clientID := ""
@@ -143,6 +159,7 @@ func lookupAccessToken(ctx *core.Context, name string) (*accessToken,
 		"state '%v' cannot be converted to translate.state", name)
 }
 
+// Translate calls API set in token state and return translated text.
 func Translate(ctx *core.Context, tokenName, from, to, target string) (
 	string, error) {
 	token, err := lookupAccessToken(ctx, tokenName)
@@ -176,6 +193,10 @@ func Translate(ctx *core.Context, tokenName, from, to, target string) (
 		return "", err
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf(
+			"response error, state code: %d, body: %s", resp.StatusCode, resp.Body)
+	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	bodyStr := "<result>" + string(body) + "</result>"
@@ -183,7 +204,7 @@ func Translate(ctx *core.Context, tokenName, from, to, target string) (
 	if err := xml.Unmarshal([]byte(bodyStr), &ret); err != nil {
 		return "", err
 	}
-	// TODO: return error message from MS TRANSLATOR API
+
 	return ret.Result, nil
 }
 
