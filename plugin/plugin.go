@@ -1,8 +1,8 @@
 package plugin
 
 import (
+	mstranslator "github.com/disktnk/sb-mstranslator"
 	"gopkg.in/sensorbee/sensorbee.v0/bql/udf"
-	mstranslator "pfi/tanakad/sb-mstranslator"
 )
 
 func init() {
